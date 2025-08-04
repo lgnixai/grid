@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/visualjs/grid#readme",
   "devDependencies": {
-    "@preact/preset-vite": "^2.1.0",
+    "@preact/preset-vite": "^2.10.2",
     "@types/jest": "^27.0.1",
     "@types/normalize-wheel": "^1.0.0",
     "autoprefixer": "^10.3.4",
@@ -38,11 +38,11 @@
     "jest": "^27.1.0",
     "normalize-wheel": "^1.0.1",
     "postcss-flexbugs-fixes": "^5.0.2",
-    "preact": "^10.5.14",
+    "preact": "^10.27.0",
     "ts-jest": "^27.0.5",
     "tsc-alias": "^1.3.9",
-    "typescript": "^4.3.5",
-    "vite": "^2.5.0"
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6"
   },
   "files": [
     "dist/**/*.css",

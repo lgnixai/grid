@@ -1,5 +1,5 @@
 import Grid from "@/grid";
-import { hydrate as p } from 'preact';
+import { render as p } from 'preact';
 import { Root as RootProvider } from '@/views/root';
 import { useLayoutEffect, useState } from "preact/hooks";
 import GridRoot from '@/views/grid';
