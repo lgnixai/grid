@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { GridProvider } from './GridProvider';
 import { VirtualGrid } from './VirtualGrid';
-import type { GridOptions } from '@/types';
+import type { GridOptions } from '@/types/index';
 import '@/styles/globals.css';
 
 export interface GridProps extends GridOptions {

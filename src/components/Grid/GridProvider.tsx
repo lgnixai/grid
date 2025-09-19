@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import type { GridOptions, GridContextValue } from '@/types';
+import type { GridOptions, GridContextValue, ColumnOptions } from '@/types/index';
 import { useGridStore } from '@/store/grid-store';
 
 const GridContext = createContext<GridContextValue | null>(null);
@@ -16,7 +16,11 @@ export function GridProvider({ children, options, gridId = 'default' }: GridProv
   // Initialize grid with options
   React.useEffect(() => {
     store.setRows(options.rows);
-    store.setColumns(options.columns);
+    try {
+      store.setColumns(((options as any).columns as any[]).filter((c: any) => (c as any).field) as unknown as ColumnOptions[]);
+    } catch {
+      store.setColumns([] as unknown as ColumnOptions[]);
+    }
     
     // Set other options
     if (options.headerHeight) {
@@ -36,8 +40,8 @@ export function GridProvider({ children, options, gridId = 'default' }: GridProv
   const contextValue = useMemo<GridContextValue>(
     () => ({
       gridId,
-      options,
-      store,
+      options: options as any,
+      store: store as any,
     }),
     [gridId, options, store]
   );

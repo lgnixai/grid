@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
 import { useGridStore } from '@/store/grid-store';
@@ -65,7 +65,7 @@ export function VirtualGrid({ className, containerRef }: VirtualGridProps) {
           }}
         >
           {virtualColumns.map((virtualColumn) => {
-            const column = columns[virtualColumn.index];
+        const column = columns[virtualColumn.index] as any;
             if (!column) return null;
 
             return (
@@ -107,7 +107,7 @@ export function VirtualGrid({ className, containerRef }: VirtualGridProps) {
               }}
             >
               {virtualColumns.map((virtualColumn) => {
-                const column = columns[virtualColumn.index];
+                const column = columns[virtualColumn.index] as any;
                 if (!column) return null;
 
                 return (

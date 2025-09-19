@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import type { CellRenderer } from '@/types';
+import type { CellRenderer } from '@/types/index';
 
 export interface BadgeRendererProps {
   value: any;

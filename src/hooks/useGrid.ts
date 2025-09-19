@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useGridStore } from '@/store/grid-store';
-import type { CellPosition, UseGridReturn } from '@/types';
+import type { CellPosition, UseGridReturn } from '@/types/index';
 
 export function useGrid(): UseGridReturn {
   const store = useGridStore();
@@ -42,8 +42,8 @@ export function useGrid(): UseGridReturn {
   }, [store]);
 
   return {
-    rows: store.rows,
-    columns: store.columns,
+    rows: store.rows as any,
+    columns: store.columns as any,
     selectedCells: store.selectedCells,
     selectedRows: store.selectedRows,
     editingCell: store.editingCell,

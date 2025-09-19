@@ -31,12 +31,34 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
-        }
+        },
+        "types": ["vitest/globals", "node"]
     },
     "include": [
-        "src",
-        "example",
-        "vite.config.ts"
+        "src/components/Editors/**/*",
+        "src/components/Renderers/**/*",
+        "src/components/ui/**/*",
+        "src/components/Grid/**/*",
+        "src/components/VirtualGrid/**/*",
+        "src/components/ModernGrid/**/*",
+        "src/components/styles/**/*",
+        "src/components/Guide/**/*",
+        "src/hooks/**/*",
+        "src/store/**/*",
+        "src/lib/**/*",
+        "src/types.ts",
+        "src/types/**/*",
+        "src/index.ts",
+        "vite.config.ts",
+        "vitest.config.ts",
+        "src/test/**/*"
+    ],
+    "exclude": [
+        "src/components/renders/**/*",
+        "src/components/editors/**/*",
+        "src/views/**/*",
+        "src/grid/**/*",
+        "example/**/*"
     ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

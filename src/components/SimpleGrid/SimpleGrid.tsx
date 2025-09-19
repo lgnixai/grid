@@ -5,7 +5,7 @@ export interface SimpleColumn {
   field: string;
   headerName?: string;
   width?: number;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: any, row: any, rowIndex?: number) => React.ReactNode;
 }
 
 export interface SimpleGridProps {

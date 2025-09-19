@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { VirtualGrid } from '../VirtualGrid';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { 
@@ -17,15 +18,16 @@ import {
   ArrowUp, 
   ArrowDown,
   Settings,
-  MoreVertical 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GuideOverlay } from '@/components/Guide/GuideOverlay';
 import type { SimpleColumn } from '../SimpleGrid/SimpleGrid';
 
 export interface ModernGridColumn extends SimpleColumn {
   sortable?: boolean;
   filterable?: boolean;
   resizable?: boolean;
+  pinned?: 'left' | 'right' | undefined;
 }
 
 export interface ModernGridProps {
@@ -59,10 +61,26 @@ export function ModernGrid({
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [columnsState, setColumnsState] = useState<ModernGridColumn[]>(columns);
+  const [internalData, setInternalData] = useState<any[]>(data);
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const resizeRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null);
+  const [newColCounter, setNewColCounter] = useState(1);
+  const [showGuide, setShowGuide] = useState(false);
+
+  // Sync with props if they change
+  useEffect(() => {
+    setColumnsState(columns);
+  }, [columns]);
+
+  useEffect(() => {
+    setInternalData(data);
+  }, [data]);
 
   // Filter and sort data
   const processedData = useMemo(() => {
-    let result = [...data];
+    let result = [...internalData];
 
     // Apply search filter
     if (searchTerm) {
@@ -88,7 +106,7 @@ export function ModernGrid({
     }
 
     return result;
-  }, [data, searchTerm, sortField, sortDirection, columns]);
+  }, [internalData, searchTerm, sortField, sortDirection, columnsState]);
 
   const handleSort = useCallback((field: string) => {
     if (sortField === field) {
@@ -104,6 +122,11 @@ export function ModernGrid({
       setSortDirection('asc');
     }
   }, [sortField, sortDirection]);
+
+  const setExplicitSort = useCallback((field: string, dir: Exclude<SortDirection, null>) => {
+    setSortField(field);
+    setSortDirection(dir);
+  }, []);
 
   const handleRowSelect = useCallback((index: number) => {
     const newSelected = new Set(selectedRows);
@@ -142,7 +165,7 @@ export function ModernGrid({
 
   // Enhanced columns with selection and sorting
   const enhancedColumns: ModernGridColumn[] = useMemo(() => {
-    const cols = [...columns];
+    const cols = [...columnsState];
 
     // Add selection column if selectable
     if (selectable) {
@@ -150,7 +173,7 @@ export function ModernGrid({
         field: '__select',
         headerName: '',
         width: 50,
-        render: (_, row, index) => (
+        render: (_, _row, index) => (
           <div className="flex justify-center">
             <Checkbox
               checked={selectedRows.has(index as number)}
@@ -163,37 +186,154 @@ export function ModernGrid({
     }
 
     return cols;
-  }, [columns, selectable, selectedRows, handleRowSelect]);
+  }, [columnsState, selectable, selectedRows, handleRowSelect]);
 
   // Enhanced header with sorting
-  const enhancedHeaderColumns = useMemo(() => {
-    return enhancedColumns.map(col => ({
-      ...col,
-      headerName: col.field === '__select' ? (
-        <div className="flex justify-center">
+  const columnsForRender = useMemo(() => {
+    // Keep pinned left columns first
+    const left = enhancedColumns.filter(c => c.pinned === 'left');
+    const middle = enhancedColumns.filter(c => !c.pinned);
+    const right = enhancedColumns.filter(c => c.pinned === 'right');
+    return [...left, ...middle, ...right];
+  }, [enhancedColumns]);
+
+  const renderHeaderCell = useCallback((col: ModernGridColumn, index: number) => {
+    if (col.field === '__select') {
+      return (
+        <div className="flex justify-center w-full" data-testid="header-__select">
           <Checkbox
             checked={selectedRows.size === processedData.length && processedData.length > 0}
-            indeterminate={selectedRows.size > 0 && selectedRows.size < processedData.length}
+            data-state={selectedRows.size > 0 && selectedRows.size < processedData.length ? 'indeterminate' as any : undefined}
             onCheckedChange={handleSelectAll}
           />
         </div>
-      ) : (
-        <div className="flex items-center justify-between w-full">
-          <span>{col.headerName || col.field}</span>
+      );
+    }
+
+    const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const startX = e.clientX;
+      const startWidth = col.width || 150;
+      resizeRef.current = { index, startX, startWidth };
+      const onMove = (ev: MouseEvent) => {
+        if (!resizeRef.current) return;
+        const delta = ev.clientX - resizeRef.current.startX;
+        const newWidth = Math.max(80, resizeRef.current.startWidth + delta);
+        setColumnsState(prev => {
+          const next = [...prev];
+          const idx = next.findIndex(c => c.field === col.field);
+          if (idx >= 0) next[idx] = { ...next[idx], width: newWidth };
+          return next;
+        });
+      };
+      const onUp = () => {
+        resizeRef.current = null;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    };
+
+    const handleInsert = (where: 'left' | 'right') => {
+      setColumnsState(prev => {
+        const next = [...prev];
+        const insertIndex = next.findIndex(c => c.field === col.field);
+        const newField = `new_${newColCounter}`;
+        setNewColCounter(c => c + 1);
+        const newCol: any = { field: newField, headerName: 'New Field', width: 150, resizable: true, sortable: true };
+        next.splice(insertIndex + (where === 'right' ? 1 : 0), 0, newCol);
+        return next;
+      });
+      setInternalData(prev => prev.map(r => ({ ...r, [`new_${newColCounter}`]: '' })));
+    };
+
+    const handleDelete = () => {
+      setColumnsState(prev => prev.filter(c => c.field !== col.field));
+      setInternalData(prev => prev.map(r => {
+        const { [col.field]: _omit, ...rest } = r;
+        return rest;
+      }));
+    };
+
+    const handleFreezeToHere = () => {
+      setColumnsState(prev => {
+        // Pin all columns up to this header to left
+        const idx = prev.findIndex(c => c.field === col.field);
+        return prev.map((c, i) => ({ ...c, pinned: i <= idx ? 'left' : undefined }));
+      });
+    };
+
+    const onDragStart = () => setDragIndex(index);
+    const onDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
+    const onDrop = () => {
+      setColumnsState(prev => {
+        if (dragIndex === null) return prev;
+        const next = [...prev];
+        const fromField = columnsForRender[dragIndex as number]?.field;
+        if (!fromField) return prev;
+        const fromIdx = next.findIndex(c => c.field === fromField);
+        const toIdx = next.findIndex(c => c.field === col.field);
+        if (fromIdx < 0 || toIdx < 0) return prev;
+        const [moved] = next.splice(fromIdx, 1);
+        next.splice(toIdx, 0, moved);
+        return next;
+      });
+      setDragIndex(null);
+    };
+
+    return (
+      <DropdownMenu open={openMenuIndex === index} onOpenChange={(o) => !o && setOpenMenuIndex(null)}>
+        <DropdownMenuTrigger asChild>
+          <div
+            className="flex items-center justify-between w-full select-none"
+            draggable
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onContextMenu={(e) => { e.preventDefault(); setOpenMenuIndex(index); }}
+            data-testid={`header-${col.field}`}
+            data-pinned={col.pinned === 'left' ? 'true' : undefined}
+          >
+            <span className="truncate">{col.headerName || col.field}</span>
+            {col.sortable && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-transparent"
+                onClick={(ev) => { ev.stopPropagation(); handleSort(col.field); }}
+              >
+                {getSortIcon(col.field)}
+              </Button>
+            )}
+
+            {col.resizable !== false && (
+              <div
+                className="absolute right-0 top-0 h-full w-1 cursor-col-resize opacity-0 hover:opacity-100 bg-primary/30"
+                onMouseDown={startResize}
+                data-testid={`resizer-${col.field}`}
+              />
+            )}
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
           {col.sortable && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-transparent"
-              onClick={() => handleSort(col.field)}
-            >
-              {getSortIcon(col.field)}
-            </Button>
+            <>
+              <DropdownMenuItem onClick={() => setExplicitSort(col.field, 'asc')}>Sort Ascending</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setExplicitSort(col.field, 'desc')}>Sort Descending</DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
           )}
-        </div>
-      ),
-    }));
-  }, [enhancedColumns, selectedRows, processedData.length, handleSelectAll, handleSort, getSortIcon]);
+          <DropdownMenuItem onClick={() => handleInsert('left')}>Insert Left</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleInsert('right')}>Insert Right</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleFreezeToHere}>Freeze to Here</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleDelete}>Delete Column</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }, [selectedRows.size, processedData.length, handleSelectAll, getSortIcon, handleSort, openMenuIndex, dragIndex, columnsForRender, newColCounter]);
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -239,6 +379,8 @@ export function ModernGrid({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowGuide(true)}>操作指南</DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>Column Settings</DropdownMenuItem>
               <DropdownMenuItem>Density</DropdownMenuItem>
               <DropdownMenuItem>Reset View</DropdownMenuItem>
@@ -249,10 +391,11 @@ export function ModernGrid({
 
       {/* Grid */}
       <VirtualGrid
-        columns={enhancedHeaderColumns}
+        columns={columnsForRender}
         data={processedData}
         height={height}
         onRowClick={onRowClick}
+        renderHeaderCell={renderHeaderCell}
       />
 
       {/* Status Bar */}
@@ -273,6 +416,9 @@ export function ModernGrid({
           </div>
         </div>
       </div>
+
+      {/* Guide */}
+      <GuideOverlay open={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }

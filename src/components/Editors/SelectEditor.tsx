@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { CellEditor } from '@/types';
+import type { CellEditor } from '@/types/index';
 
 export interface SelectEditorProps {
   value: any;

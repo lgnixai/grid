@@ -11,7 +11,9 @@ export interface VirtualGridProps {
   rowHeight?: number;
   headerHeight?: number;
   overscan?: number;
-  onRowClick?: (row: any, index: number) => void;
+  onRowClick?: ((row: any, index: number) => void) | undefined;
+  // Optional interaction hooks for header cells
+  renderHeaderCell?: (column: SimpleColumn, index: number) => React.ReactNode | undefined;
 }
 
 export function VirtualGrid({
@@ -23,6 +25,7 @@ export function VirtualGrid({
   headerHeight = 40,
   overscan = 5,
   onRowClick,
+  renderHeaderCell,
 }: VirtualGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +64,7 @@ export function VirtualGrid({
             style={{ width: column.width || 150, minWidth: column.width || 150 }}
           >
             {column.render 
-              ? column.render(row[column.field], row)
+              ? column.render(row[column.field], row, virtualRow.index)
               : String(row[column.field] || '-')
             }
           </div>
@@ -90,7 +93,7 @@ export function VirtualGrid({
               className="px-3 py-2 font-medium text-muted-foreground border-r border-border/50 last:border-r-0 flex items-center"
               style={{ width: column.width || 150, minWidth: column.width || 150 }}
             >
-              {column.headerName || column.field}
+              {renderHeaderCell ? renderHeaderCell(column, columns.findIndex(c => c.field === column.field)) : (column.headerName || column.field)}
             </div>
           ))}
         </div>

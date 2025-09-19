@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { CellEditor } from '@/types';
+import type { CellEditor } from '@/types/index';
 
 export interface CheckboxEditorProps {
   value: any;

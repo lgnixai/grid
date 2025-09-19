@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { CellRenderer } from '@/types';
+import type { CellRenderer } from '@/types/index';
 
 export interface CheckboxRendererProps {
   value: any;

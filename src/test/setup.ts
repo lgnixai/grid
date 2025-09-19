@@ -2,18 +2,18 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn(() => ({
+;(globalThis as any).IntersectionObserver = vi.fn(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
   unobserve: vi.fn(),
-}));
+})) as any;
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn(() => ({
+;(globalThis as any).ResizeObserver = vi.fn(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
   unobserve: vi.fn(),
-}));
+})) as any;
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
