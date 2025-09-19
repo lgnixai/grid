@@ -2,6 +2,10 @@
 export { Grid, type GridProps } from './components/Grid';
 export { default } from './components/Grid';
 
+// New React components (Airtable-like)
+export { ModernGrid, type ModernGridProps } from './components/ModernGrid/ModernGrid';
+export { VirtualGrid, type VirtualGridProps } from './components/VirtualGrid/VirtualGrid';
+
 // Grid context and hooks
 export { GridProvider, useGridContext } from './components/Grid/GridProvider';
 export { useGrid } from './hooks/useGrid';

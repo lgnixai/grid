@@ -1,6 +1,12 @@
-import { CellRenderer, CellEditor, CellTransformer } from "@/grid/cell";
-import { JSXInternal } from "preact/src/jsx";
-import Grid from "./grid";
+// Note: Legacy preact/Grid typings are excluded from the React build.
+// Provide minimal stubs to satisfy type references without importing preact.
+export namespace JSXInternal { export type CSSProperties = any; }
+type Grid = any;
+type CellTransformer = any;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface LegacyCellRenderer<T = unknown> { new(): any }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface LegacyCellEditor<T = unknown> { new(): any }
 
 export type Unsubscribe = () => void;
 
@@ -75,13 +81,8 @@ export interface RowData {
     [key: string]: any;
 }
 
-interface ICellRenderer {
-    new(): CellRenderer<unknown>;
-}
-
-interface ICellEditor {
-    new(): CellEditor<unknown>;
-}
+interface ICellRenderer { new(): any; }
+interface ICellEditor { new(): any; }
 
 export type RowPinned = 'top' | 'bottom' | undefined;
 export type ColumnPinned = 'left' | 'right' | undefined;

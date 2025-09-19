@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { subscribeWithSelector } from 'zustand/middleware';
-import type { ColumnOptions, RowData, CellPosition } from '@/types';
+import type { ColumnOptions, RowData, CellPosition } from '@/types/index';
 
 export interface GridState {
   // Grid configuration
