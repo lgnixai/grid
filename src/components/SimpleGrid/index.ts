@@ -1,0 +1,1 @@
+export { SimpleGrid, type SimpleGridProps, type SimpleColumn } from './SimpleGrid';

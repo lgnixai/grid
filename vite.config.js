@@ -1,31 +1,37 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-    plugins: [preact()],
+    plugins: [react()],
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src'),
-            entries: [
-                { find: 'react', replacement: 'preact/compat' },
-                { find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
-                { find: 'react-dom', replacement: 'preact/compat' },
-                { find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' }
-            ]
         }
     },
     css: {
-        modules: {
-            localsConvention: 'camelCaseOnly',
-            generateScopedName: 'v-grid-[local]'
-        }
+        postcss: './postcss.config.js',
     },
     build: {
         lib: {
             entry: path.resolve(__dirname, 'src/index.ts'),
-            name: 'VisualJS',
-            fileName: (format) => `visual-grid.${format}.js`
+            name: 'VisualGrid',
+            fileName: (format) => `visual-grid.${format}.js`,
+            formats: ['es', 'umd']
+        },
+        rollupOptions: {
+            external: ['react', 'react-dom'],
+            output: {
+                globals: {
+                    react: 'React',
+                    'react-dom': 'ReactDOM'
+                }
+            }
         }
+    },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: ['./src/test/setup.ts'],
     }
 })
