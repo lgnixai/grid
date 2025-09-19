@@ -4,22 +4,100 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisualJS - Grid</title>
-    <link rel="stylesheet" href="../src/themes/default.css">
-    <link rel="stylesheet" href="../src/themes/default-dark.css">
-    <link rel="stylesheet" href="../src/themes/energetic.css">
-    <link rel="stylesheet" href="../src/themes/energetic-dark.css">
+    <title>Visual Grid 2.0 - Modern React Data Grid</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .example-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .example-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .example-header h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .example-header p {
+            margin: 0;
+            color: #64748b;
+        }
+        .example-content {
+            padding: 1.5rem;
+        }
+        #modern-example {
+            min-height: 600px;
+        }
+        .legacy-notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .legacy-notice h3 {
+            margin: 0 0 0.5rem 0;
+            color: #92400e;
+        }
+        .legacy-notice p {
+            margin: 0;
+            color: #92400e;
+        }
+    </style>
 </head>
 <body>
-    <div class="container" id="full-example-container">
-        <div id="full-example" class="example-grid-wrapper v-grid-default-theme"></div>
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 3rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0;">
+                Visual Grid 2.0
+            </h1>
+            <p style="font-size: 1.25rem; color: #64748b; margin: 0;">
+                Modern React Data Grid - Completely Rewritten with Latest Technologies
+            </p>
+        </header>
+
+        <div class="example-section">
+            <div class="example-header">
+                <h2>🚀 Modern React 18 + Shadcn/UI Implementation</h2>
+                <p>Featuring virtual scrolling, Zustand state management, and beautiful UI components</p>
+            </div>
+            <div class="example-content">
+                <div id="modern-example"></div>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <div class="example-header">
+                <h2>📊 Legacy Preact Implementation</h2>
+                <p>Original implementation for comparison</p>
+            </div>
+            <div class="example-content">
+                <div class="legacy-notice">
+                    <h3>⚠️ Legacy Implementation</h3>
+                    <p>This is the original Preact-based implementation. The new React 18 version above demonstrates the modern refactored approach.</p>
+                </div>
+                <div id="full-example" style="height: 600px; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
+            </div>
+        </div>
     </div>
-    <div class="container" id="interactive-example-container">
-        <div id="interactive-example" class="example-grid-wrapper v-grid-default-dark-theme"></div>
-    </div>
-    <div class="container" id="async-render-container">
-        <div id="async-render" class="example-grid-wrapper v-grid-energetic-theme"></div>
-    </div>
+
+    <script type="module" src="./example/modern-example.tsx"></script>
     <script type="module" src="./example/index.ts"></script>
 </body>
 </html>
